@@ -9,3 +9,6 @@
 /README.txt
 /dist
 /*.egg-info
+
+# VS Code
+.vscode/
