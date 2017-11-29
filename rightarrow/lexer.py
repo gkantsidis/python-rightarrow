@@ -9,7 +9,7 @@ class Lexer(object):
     '''
     A Lexical analyzer for Python Typelanguage.
     '''
-    
+
     def __init__(self, debug=False):
         self.debug = debug
 
@@ -17,7 +17,7 @@ class Lexer(object):
         '''
         Maps a string to an iterator over tokens. In other words: [char] -> [token]
         '''
-        
+
         new_lexer = ply.lex.lex(module=self, debug=self.debug, errorlog=logger)
         new_lexer.latest_newline = 0
         new_lexer.input(string)
@@ -37,10 +37,10 @@ class Lexer(object):
     # Anyhow, it is pythonic to give some rope to hang oneself with :-)
 
     literals = ['|', '(', ')', '{', '}', '[', ']', ':', '*', ',', ';']
-    
+
     reserved_words = { 'object': 'OBJECT' }
 
-    tokens = ['ID', 'TYVAR', 'ARROW', 'KWARG', 'ANY'] + reserved_words.values()
+    tokens = ['ID', 'TYVAR', 'ARROW', 'KWARG', 'ANY'] + list(reserved_words.values())
 
     t_ARROW = r'->'
     t_KWARG = r'\*\*'
@@ -72,4 +72,4 @@ if __name__ == '__main__':
     logging.basicConfig()
     lexer = Lexer(debug=True)
     for token in lexer.tokenize(sys.stdin.read()):
-        print '%-20s%s' % (token.value, token.type)
+        print('%-20s%s' % (token.value, token.type))

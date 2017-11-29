@@ -1,4 +1,4 @@
-import setuptools 
+import setuptools
 import sys
 import os.path
 import subprocess
@@ -18,7 +18,7 @@ setuptools.setup(
     author_email='kenn.knowles@gmail.com',
     url='https://github.com/kennknowles/python-rightarrow',
     license='Apache 2.0',
-    long_description=open(readme).read(),
+    long_description=open(readme, encoding="utf8").read(),
     packages = ['rightarrow'],
     test_suite = 'tests',
     install_requires = [ 'ply', 'decorator' ],

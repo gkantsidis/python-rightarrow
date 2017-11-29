@@ -7,7 +7,7 @@ from rightarrow.annotations import *
 
 class Constraint(object):
     "A type constraint of the form `S <: T`"
-    
+
     def __init__(self, subtype, supertype):
         self.subtype = subtype
         self.supertype = supertype
@@ -21,7 +21,7 @@ class Constraint(object):
 
 class ConstrainedType(object):
     "A type along with a set of constraints, of the form `T & [S1 <: T1, ...]`"
-    
+
     def __init__(self, type=None, constraints=None):
         self.type = type
         self.constraints = constraints or []
@@ -30,10 +30,10 @@ class ConstrainedEnv(object):
     """
     An environment mapping variables to types, along with some constraints, and a return type.
     One way to write it might be like...
-    
+
     T_return & { x: T_x, f: T_f, ... } & [S1 <: T1, ...]
     """
-    
+
     def __init__(self, env=None, constraints=None, return_type=None):
         self.env = env or {}
         self.constraints = constraints or []
@@ -45,14 +45,14 @@ class ConstrainedEnv(object):
                               return_type = None if self.return_type is None else self.return_type.substitute(substitution))
 
     def pretty(self):
-        return ("Env:\n\t%(bindings)s\n\nConstraints:\n\t%(constraints)s\n\nResult:\n\t%(result)s" % 
+        return ("Env:\n\t%(bindings)s\n\nConstraints:\n\t%(constraints)s\n\nResult:\n\t%(result)s" %
                 dict(bindings    = '\n\t'.join(['%s: %s' % (var, ty) for var, ty in self.env.items()]),
                      constraints = '\n\t'.join([str(c) for c in self.constraints]),
                      result      = self.return_type))
-    
+
 def constraints(pyast, env=None):
     env = env or {}
-    
+
     if isinstance(pyast, ast.Module) or isinstance(pyast, ast.Interactive):
         env = copy.copy(env)
         constraints = []
@@ -83,14 +83,14 @@ def fn_env(arguments):
         if isinstance(arg, ast.Name) and isinstance(arg.ctx, ast.Param):
             new_env[arg.id] = fresh() # TODO: ??
         else:
-            raise Exception('Arg is not a name in Param context!? %s' % arg) 
+            raise Exception('Arg is not a name in Param context!? %s' % arg)
 
     if arguments.vararg:
         new_env[arguments.vararg] = fresh() # TODO: sub/superty of list
 
     if arguments.kwarg:
         new_env[arguments.kwarg] = fresh() # TODO: sub/superty of dict
-    
+
     return new_env
 
 def union(left, right):
@@ -105,11 +105,11 @@ def constraints_stmt(stmt, env=None):
     """
     Since a statement may define new names or return an expression ,
     the constraints that result are in a
-    ConstrainedEnv mapping names to types, with constraints, and maybe 
+    ConstrainedEnv mapping names to types, with constraints, and maybe
     having a return type (which is a constrained type)
     """
     env = env or {}
-    
+
     if isinstance(stmt, ast.FunctionDef):
         arg_env = fn_env(stmt.args)
 
@@ -130,7 +130,7 @@ def constraints_stmt(stmt, env=None):
     elif isinstance(stmt, ast.Expr):
         constrained_ty = constraints_expr(stmt.value, env=env)
         return ConstrainedEnv(env=env, constraints=constrained_ty.constraints)
-        
+
     elif isinstance(stmt, ast.Return):
         if stmt.value:
             expr_result = constraints_expr(stmt.value, env=env)
@@ -145,22 +145,22 @@ def constraints_stmt(stmt, env=None):
 
         expr_result = constraints_expr(stmt.value, env=env)
         target = stmt.targets[0].id
-        
+
         # For an assignment, we actually generate a fresh variable so that it can be the union of all things assigned
         # to it. We do not do any typestate funkiness.
         if target not in env:
             env[target] = fresh()
-            
-        return ConstrainedEnv(env=env, 
-                              constraints = expr_result.constraints + [Constraint(subtype=expr_result.type, 
+
+        return ConstrainedEnv(env=env,
+                              constraints = expr_result.constraints + [Constraint(subtype=expr_result.type,
                                                                                   supertype=env[target])])
 
     else:
         raise NotImplementedError('Constraint gen for stmt %s' % stmt)
-    
+
 def constraints_expr(expr, env=None):
     env = env or {}
-    
+
     if isinstance(expr, ast.Name) and isinstance(expr.ctx, ast.Load):
         if expr.id in ['False', 'True']: # Unlike other literals, these are actually just global identifiers
             return ConstrainedType(type=bool_t)
@@ -185,12 +185,12 @@ def constraints_expr(expr, env=None):
 
     elif isinstance(expr, ast.List):
         return ConstrainedType(type=List(elem_ty=fresh()))
-        
+
     elif isinstance(expr, ast.BinOp):
         left = constraints_expr(expr.left, env=env)
         right = constraints_expr(expr.right, env=env)
         ty = fresh()
-        
+
         if isinstance(expr.op, ast.Mult):
             # TODO: consider whether all types should match (forces coercions to be explicit; a good thing)
             # Note: though strings and bools can be used in mult, forget it!
@@ -209,6 +209,6 @@ if __name__ == '__main__':
     with open(sys.argv[1]) as fh:
         proggy = ast.parse(fh.read())
 
-    print ast.dump(proggy)
-        
-    print constraints(proggy).pretty()
+    print(ast.dump(proggy))
+
+    print(constraints(proggy).pretty())

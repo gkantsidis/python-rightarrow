@@ -30,7 +30,7 @@ def reconcile(constraint):
     Returns an assignment of type variable names to
     types that makes this constraint satisfiable, or a Refutation
     '''
-    
+
     if isinstance(constraint.subtype, NamedType):
         if isinstance(constraint.supertype, NamedType):
             if constraint.subtype.name == constraint.supertype.name:
@@ -67,8 +67,8 @@ def solve(constraints):
     # Constraints that we've passed up because we don't know what to do with it;
     # if all constraints get moved into this list then give up.
     # Whenever progress is made, put these back in before substituting
-    stumpers = [] 
-    
+    stumpers = []
+
     while len(remaining_constraints) > 0:
         constraint = remaining_constraints.pop()
 
@@ -94,14 +94,14 @@ def solve(constraints):
 if __name__ == '__main__':
     logging.basicConfig()
     logging.getLogger('').setLevel(logging.DEBUG)
-    
+
     with open(sys.argv[1]) as fh:
         proggy = ast.parse(fh.read())
 
     cs = constraintgen.constraints(proggy)
-    print cs.pretty()
+    print(cs.pretty())
 
     substitution = solve(cs.constraints)
     if not isinstance(substitution, Refutation):
-        print substitution
-        print cs.substitute(substitution).pretty()
+        print(substitution)
+        print(cs.substitute(substitution).pretty())

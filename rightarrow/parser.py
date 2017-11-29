@@ -29,7 +29,7 @@ class Parser(object):
             module_name = os.path.splitext(os.path.split(__file__)[1])[0]
         except:
             module_name = __name__
-        
+
         parsing_table_module = '_'.join([module_name, start_symbol, 'parsetab'])
 
         # And we regenerate the parse table every time; it doesn't actually take that long!
@@ -44,14 +44,14 @@ class Parser(object):
         return new_parser.parse(lexer = IteratorToTokenStream(token_iterator))
 
     # ===================== PLY Parser specification =====================
-    
+
     precedence = [
         ('right', 'ARROW'),
         ('left', '|'),
     ]
 
     def p_error(self, t):
-        raise Exception('Parse error at %s:%s near token %s (%s)' % (t.lineno, t.col, t.value, t.type)) 
+        raise Exception('Parse error at %s:%s near token %s (%s)' % (t.lineno, t.col, t.value, t.type))
 
     def p_empty(self, p):
         'empty :'
@@ -176,7 +176,7 @@ class Parser(object):
     def p_obj_field(self, p):
         "obj_field : ID ':' ty"
         p[0] = (p[1], p[3])
-        
+
 
 class IteratorToTokenStream(object):
     def __init__(self, iterator):
@@ -184,7 +184,7 @@ class IteratorToTokenStream(object):
 
     def token(self):
         try:
-            return self.iterator.next()
+            return self.iterator.__next__()
         except StopIteration:
             return None
 
@@ -192,4 +192,4 @@ class IteratorToTokenStream(object):
 if __name__ == '__main__':
     logging.basicConfig()
     parser = Parser(debug=True)
-    print parser.parse(sys.stdin.read())
+    print(parser.parse(sys.stdin.read()))
