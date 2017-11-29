@@ -18,7 +18,7 @@ class FunctionKind(Kind):
         self.dom = dom
         self.rng = rng
 
-        
+
 ## Types proper
 
 class Type(object): pass
@@ -90,8 +90,8 @@ class Dict(Type):
             raise TypeError('Type check failed: %s is not a list %s' % (val, self))
         else:
             return dict([(self.key_ty.enforce(key), self.value_ty.enforce(value)) for key, value in val.items()])
-            
-        
+
+
 class Variable(Type):
     def __init__(self, name):
         self.name = name
@@ -143,8 +143,8 @@ class Function(Type):
     def __init__(self, arg_types, return_type, vararg_type=None, kwonly_arg_types=None, kwarg_type=None):
         self.arg_types = arg_types
         self.return_type = return_type
-        self.vararg_type = vararg_type 
-        self.kwarg_type = kwarg_type 
+        self.vararg_type = vararg_type
+        self.kwarg_type = kwarg_type
         self.kwonly_arg_types = kwonly_arg_types
 
     def substitute(self, substitution):
@@ -204,12 +204,12 @@ class Function(Type):
                         kwarg_type.substitute({b.name : b})
 
             return return_type.enforce(f(*(wrapped_args + wrapped_varargs), **wrapped_kwargs))
-            
+
         return decorator(wrap_with_checks)(f)
 
     def __str__(self):
         comma_separated_bits = [unicode(v) for v in self.arg_types]
-        
+
         if self.vararg_type:
             comma_separated_bits.append('*%s' % self.vararg_type)
 
@@ -223,7 +223,7 @@ class Function(Type):
             argument_list = comma_separated_bits[0]
         else:
             argument_list = '(%s)' % ','.join(comma_separated_bits)
-        
+
         return '%s -> %s' % (argument_list, self.return_type)
 
     def __eq__(self, other):
@@ -260,7 +260,7 @@ class Union(Type):
 class Object(Type):
     def __init__(self, self_ty_name, **field_tys):
         self.self_ty_name = self_ty_name
-        self.field_tys = field_tys 
+        self.field_tys = field_tys
 
     def __str__(self):
         return 'object(%s)' % ','.join([self.self_ty_name] + ['%s:%s' % (name, ty) for name, ty in self.field_tys.items()])
@@ -270,11 +270,11 @@ class Object(Type):
 
     def enforce(self, val):
         # TODO: bind the self type
-        
+
         # We must have a copy with the same class, or it will break code relying on isinstance. Whether this is a "problem"
         # is debatable, but given the usual encoding of coproducts as distinct subclasses, we'd better respect it.
         newval = copy.copy(val)
-        
+
         # Technically lets other properties slip in, but due to every object having a bunch of __foo__ props that can wait
         for field, ty in self.field_tys.items():
             setattr(newval, field, ty.enforce(getattr(val, field)))

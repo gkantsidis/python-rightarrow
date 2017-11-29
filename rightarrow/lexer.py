@@ -19,13 +19,13 @@ class Lexer(object):
         '''
 
         new_lexer = ply.lex.lex(module=self, debug=self.debug, errorlog=logger)
-        new_lexer.latest_newline = 0
+        # new_lexer.latest_newline = 0
         new_lexer.input(string)
 
         while True:
             t = new_lexer.token()
             if t is None: break
-            t.col = t.lexpos - new_lexer.latest_newline
+            # t.col = t.lexpos - new_lexer.latest_newline
             yield t
 
     # ============== PLY Lexer specification ==================
@@ -66,7 +66,8 @@ class Lexer(object):
         t.lexer.latest_newline = t.lexpos
 
     def t_error(self, t):
-        raise Exception('Error on line %s, col %s: Unexpected character: %s ' % (t.lexer.lineno, t.lexpos - t.latest_newline, t.value[0]))
+        # raise Exception('Error on line %s, col %s: Unexpected character: %s ' % (t.lexer.lineno, t.lexpos - t.latest_newline, t.value[0]))
+        raise Exception('Error on line %s : Unexpected character: %s ' % (t.lexer.lineno, t.value[0]))
 
 if __name__ == '__main__':
     logging.basicConfig()
